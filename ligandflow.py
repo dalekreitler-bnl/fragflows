@@ -18,8 +18,7 @@ from pathlib import Path
 from time import sleep
 
 root_dir = Path("/data")
-models_path = root_dir / \
-    Path("models")
+models_path = root_dir / Path("models")
 ligands = root_dir / Path("ligands.csv")
 
 
@@ -47,7 +46,7 @@ def validate_sample_dir(sample_path: Path):
 def generate_acedrg_params(sample_dict: dict):
     """do some processing on the sample_dict to make a dict that contains
     acedrg parameters"""
-    smiles_list = sample_dict["smiles"].split('.')
+    smiles_list = sample_dict["smiles"].split(".")
     smiles_list.sort(key=len)
     smiles = smiles_list[-1]  # largest molecule
     acedrg_params = {
@@ -71,14 +70,13 @@ def run_acedrg(acedrg_params: dict, sample_path: Path):
 
 @flow(name="acedrg_flow", task_runner=ConcurrentTaskRunner)
 def acedrg_flow(samples: list, **kwargs):
-    sample_paths = [
-        find_sample_path(sample_dict) for sample_dict in samples
-    ]
+    sample_paths = [find_sample_path(sample_dict) for sample_dict in samples]
 
     run_acedrg.map(
         [
             generate_acedrg_params(samples[idx])
-            for idx, sample_dir in enumerate(sample_paths) if sample_dir != None
+            for idx, sample_dir in enumerate(sample_paths)
+            if sample_dir != None
         ],
         [path for path in sample_paths if path != None],
     )
@@ -89,6 +87,6 @@ if __name__ == "__main__":
         reader = csv.DictReader(f)
         samples = [row for row in reader]
 
-    sample_chunks = [samples[i: i + 80] for i in range(0, len(samples), 80)]
+    sample_chunks = [samples[i : i + 80] for i in range(0, len(samples), 80)]
     for chunk in sample_chunks:
         acedrg_flow(chunk)
