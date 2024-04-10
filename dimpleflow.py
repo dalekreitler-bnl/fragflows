@@ -15,6 +15,7 @@ from prefect import task, flow
 from prefect.task_runners import ConcurrentTaskRunner
 from pathlib import Path
 import pandas
+import multiprocessing
 
 """
 INSTRUCTIONS:
@@ -70,6 +71,12 @@ def dimple_flow(jobs, **kwargs):
 
 
 if __name__ == "__main__":
-    job_chunks = [jobs_list[i : i + 30] for i in range(0, len(jobs_list), 30)]
+    n_cpus = multiprocessing.cpu_count()
+    if n_cpus < 30:
+        n_chunks = n_cpus
+    else:
+        n_chunks = 30
+
+    job_chunks = [jobs_list[i : i + n_chunks] for i in range(0, len(jobs_list), n_chunks)]
     for chunk in job_chunks:
         dimple_flow(chunk)
