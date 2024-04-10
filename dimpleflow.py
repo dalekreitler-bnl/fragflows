@@ -16,10 +16,24 @@ from prefect.task_runners import ConcurrentTaskRunner
 from pathlib import Path
 import pandas
 
-root_dir = Path("/data")
-models_dir = root_dir / Path("models")
-reference_model = str(root_dir / Path("reference.pdb"))
-jobs_csv = root_dir / Path("filtered.csv")
+"""
+INSTRUCTIONS:
+Make a processing directory, e.g. processing-dir
+within processing directory add
+-reference pdb model
+-a subdirectory for dimple outputs, e.g. models
+-filtered csv file from gather script
+"""
+
+PROCESSING_DATA_DIRECTORY=""
+MODELS_DIRECTORY="models"
+REFERENCE_PDB = "reference.pdb"
+FILTERED_XRAY_CSV = ""
+
+root_dir = Path(f"{PROCESSING_DATA_DIRECTORY}")
+models_dir = root_dir / Path(f"{MODELS_DIRECTORY}")
+reference_model = str(root_dir / Path(f"{REFERENCE_PDB}"))
+jobs_csv = root_dir / Path(f"{FILTERED_XRAY_CSV}")
 jobs_df = pandas.read_csv(jobs_csv)
 jobs_list = []
 
