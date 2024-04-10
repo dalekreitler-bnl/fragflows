@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/nsls2/conda/envs/2023-1.1-py39/bin/python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Aug 17 09:00:15 2023
@@ -9,9 +9,23 @@ Created on Thu Aug 17 09:00:15 2023
 import os
 import pandas
 import subprocess
+import datetime
+
+"""
+INSTRUCTIONS:
+
+Edit DATA_DIRECTORY to include path to xray data, e.g.
+/nsls2/data/amx/proposals/2023-3/pass-313937/313937-20231105-dtime
+
+Edit SAMPLE_NAME to include unique sample id in master.h5 filename
+for including in the dataset
+"""
+
+DATA_DIRECTORY = ""
+SAMPLE_NAME = ""
 
 df = pandas.DataFrame()
-find_cmd = ["find", "/data", "-maxdepth", "4", "-name", "*summary.csv"]
+find_cmd = ["find", f"{DATA_DIRECTORY}", "-maxdepth", "4", "-name", "*summary.csv"]
 find_output = subprocess.check_output(find_cmd, universal_newlines=True)
 csv_files = find_output.splitlines()
 
@@ -32,7 +46,7 @@ df["xtal_id"] = ""
 for index, row in df.iterrows():
     df.at[index, "xtal_id"] = row["Sample_Path"].split("/")[0]
 
-df_filtered = df[df["xtal_id"].str.contains("sample_name")]
+df_filtered = df[df["xtal_id"].str.contains(f"{SAMPLE_NAME}")]
 final_df = df_filtered.groupby("xtal_id").apply(
     lambda group: group.loc[group["Hi"].idxmin()]
 )
@@ -40,7 +54,7 @@ final_df = df_filtered.groupby("xtal_id").apply(
 # get list of all reflection files
 find_cmd = [
     "find",
-    "/data",
+    f"{DATA_DIRECTORY}",
     "-name",
     "truncate-unique.mtz",
     "-o",
@@ -61,3 +75,6 @@ for index, row in final_df.iterrows():
             final_df.at[index, "filepath"] = f
 
 print(final_df)
+final_df.to_csv(
+    f"{SAMPLE_NAME}.{datetime.datetime.now().strftime('%Y%m%d')}.filtered.csv"
+)
